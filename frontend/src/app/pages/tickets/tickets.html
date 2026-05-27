@@ -1,0 +1,88 @@
+<div class="tickets">
+    <div class="tickets-header">
+        <h1>Gestión de Tickets</h1>
+        <button class="btn btn-primary" (click)="showCreateForm = !showCreateForm">
+            {{ showCreateForm ? 'Cancelar' : 'Crear Ticket' }}
+        </button>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+    </div>
+
+    <!-- Formulario de creación -->
+    <div *ngIf="showCreateForm" class="create-form-card">
+        <h2>Nuevo Ticket</h2>
+        <form [formGroup]="createForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" formControlName="title" class="form-control"
+                    [class.is-invalid]="submitted && f['title'].errors">
+                <div *ngIf="submitted && f['title'].errors" class="invalid-feedback">
+                    <div *ngIf="f['title'].errors['required']">Título es requerido</div>
+                    <div *ngIf="f['title'].errors['minlength']">Mínimo 5 caracteres</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea formControlName="description" class="form-control" rows="4"
+                    [class.is-invalid]="submitted && f['description'].errors"></textarea>
+                <div *ngIf="submitted && f['description'].errors" class="invalid-feedback">
+                    <div *ngIf="f['description'].errors['required']">Descripción es requerida</div>
+                    <div *ngIf="f['description'].errors['minlength']">Mínimo 10 caracteres</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Prioridad</label>
+                <select formControlName="priority" class="form-control">
+                    <option value="LOW">Baja</option>
+                    <option value="MEDIUM">Media</option>
+                    <option value="HIGH">Alta</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">Crear Ticket</button>
+        </form>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+        <button class="btn-filter" (click)="filterByStatus('ALL')">Todos</button>
+        <button class="btn-filter" (click)="filterByStatus('OPEN')">Abiertos</button>
+        <button class="btn-filter" (click)="filterByStatus('IN_PROGRESS')">En Progreso</button>
+        <button class="btn-filter" (click)="filterByStatus('RESOLVED')">Resueltos</button>
+    </div>
+
+    <!-- Lista de tickets -->
+    <div *ngIf="loading" class="loading">
+        Cargando tickets...
+    </div>
+
+    <div *ngIf="!loading && filteredTickets.length === 0" class="no-data">
+        No hay tickets para mostrar
+    </div>
+
+    <div *ngIf="!loading && filteredTickets.length > 0" class="tickets-list">
+        <div *ngFor="let ticket of filteredTickets" class="ticket-card">
+            <div class="ticket-header">
+                <h3>{{ ticket.title }}</h3>
+                <span [class]="'badge ' + getStatusBadge(ticket.status)">
+                    {{ ticket.status }}
+                </span>
+            </div>
+
+            <p class="ticket-description">{{ ticket.description }}</p>
+
+            <div class="ticket-meta">
+                <span [class]="'badge ' + getPriorityBadge(ticket.priority)">
+                    {{ ticket.priority }}
+                </span>
+                <span class="date">{{ ticket.createdAt | date: 'short' }}</span>
+            </div>
+
+            <a [routerLink]="['/tickets', ticket.id]" class="btn-link">Ver detalles →</a>
+        </div>
+    </div>
+</div>

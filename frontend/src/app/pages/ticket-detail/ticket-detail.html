@@ -1,0 +1,109 @@
+<div class="ticket-detail">
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+
+    <div *ngIf="loading" class="loading">
+        Cargando ticket...
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+    </div>
+
+    <div *ngIf="!loading && ticket" class="detail-content">
+        <!-- Header -->
+        <div class="detail-header">
+            <div>
+                <h1>{{ ticket.title }}</h1>
+                <p class="ticket-id">ID: {{ ticket.id }}</p>
+            </div>
+            <div class="badges">
+                <span [class]="'badge ' + getStatusBadge(ticket.status)">
+                    {{ ticket.status }}
+                </span>
+                <span [class]="'badge ' + getPriorityBadge(ticket.priority)">
+                    {{ ticket.priority }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Info General -->
+        <div class="detail-section">
+            <h2>Información General</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Descripción</label>
+                    <p>{{ ticket.description }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Creado por</label>
+                    <p>{{ ticket.creator?.name }} ({{ ticket.creator?.email }})</p>
+                </div>
+                <div class="info-item">
+                    <label>Fecha de Creación</label>
+                    <p>{{ ticket.createdAt | date: 'medium' }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Última Actualización</label>
+                    <p>{{ ticket.updatedAt | date: 'medium' }}</p>
+                </div>
+                <div class="info-item" *ngIf="ticket.assignee">
+                    <label>Asignado a</label>
+                    <p>{{ ticket.assignee.name }} ({{ ticket.assignee.email }})</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cambiar Estado -->
+        <div class="detail-section">
+            <h2>Cambiar Estado</h2>
+            <div class="status-buttons">
+                <button class="btn" (click)="updateStatus('OPEN')" [disabled]="ticket.status === 'OPEN'">
+                    Abrir
+                </button>
+                <button class="btn" (click)="updateStatus('IN_PROGRESS')" [disabled]="ticket.status === 'IN_PROGRESS'">
+                    En Progreso
+                </button>
+                <button class="btn" (click)="updateStatus('RESOLVED')" [disabled]="ticket.status === 'RESOLVED'">
+                    Resuelto
+                </button>
+                <button class="btn" (click)="updateStatus('REJECTED')" [disabled]="ticket.status === 'REJECTED'">
+                    Rechazado
+                </button>
+            </div>
+        </div>
+
+        <!-- Comentarios -->
+        <div class="detail-section">
+            <h2>Comentarios ({{ ticket.comments?.length || 0 }})</h2>
+
+            <!-- Agregar comentario -->
+            <div class="add-comment">
+                <form [formGroup]="commentForm" (ngSubmit)="onSubmitComment()">
+                    <div class="form-group">
+                        <textarea formControlName="content" placeholder="Agrega un comentario..." rows="3"
+                            class="form-control" [class.is-invalid]="submitted && f['content'].errors"></textarea>
+                        <div *ngIf="submitted && f['content'].errors" class="invalid-feedback">
+                            <div *ngIf="f['content'].errors['required']">El comentario es requerido</div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Comentar</button>
+                </form>
+            </div>
+
+            <!-- Lista de comentarios -->
+            <div *ngIf="!ticket.comments || ticket.comments.length === 0" class="no-comments">
+                No hay comentarios aún
+            </div>
+
+            <div *ngIf="ticket.comments && ticket.comments.length > 0" class="comments-list">
+                <div *ngFor="let comment of ticket.comments" class="comment-item">
+                    <div class="comment-header">
+                        <strong>{{ comment.user?.name }}</strong>
+                        <span class="comment-date">{{ comment.createdAt | date: 'short' }}</span>
+                    </div>
+                    <p class="comment-content">{{ comment.content }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

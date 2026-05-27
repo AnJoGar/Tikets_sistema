@@ -1,0 +1,39 @@
+<div class="login-container">
+    <div class="login-card">
+        <h1>Login</h1>
+
+        <div *ngIf="error" class="alert alert-danger">
+            {{ error }}
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" formControlName="email" class="form-control"
+                    [class.is-invalid]="submitted && f['email'].errors">
+                <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                    <div *ngIf="f['email'].errors['required']">Email es requerido</div>
+                    <div *ngIf="f['email'].errors['email']">Email inválido</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" formControlName="password" class="form-control"
+                    [class.is-invalid]="submitted && f['password'].errors">
+                <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+                    <div *ngIf="f['password'].errors['required']">Contraseña es requerida</div>
+                    <div *ngIf="f['password'].errors['minlength']">Mínimo 8 caracteres</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+                {{ loading ? 'Iniciando...' : 'Login' }}
+            </button>
+        </form>
+
+        <p class="text-center mt-3">
+            ¿No tienes cuenta? <a routerLink="/register">Regístrate</a>
+        </p>
+    </div>
+</div>

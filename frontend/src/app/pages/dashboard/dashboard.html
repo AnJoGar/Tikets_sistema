@@ -1,0 +1,63 @@
+<div class="dashboard">
+    <h1>Bienvenido, {{ currentUser?.name }}!</h1>
+
+    <div class="dashboard-header">
+        <div class="stats">
+            <div class="stat-card">
+                <h3>{{ tickets.length }}</h3>
+                <p>Tickets Recientes</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tickets-section">
+        <h2>Tus Últimos Tickets</h2>
+
+        <div *ngIf="loading" class="loading">
+            Cargando...
+        </div>
+
+        <div *ngIf="error" class="alert alert-danger">
+            {{ error }}
+        </div>
+
+        <div *ngIf="!loading && tickets.length === 0" class="no-data">
+            <p>No tienes tickets. <a routerLink="/tickets">Crear uno</a></p>
+        </div>
+
+        <table *ngIf="!loading && tickets.length > 0" class="table">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Creado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let ticket of tickets">
+                    <td>{{ ticket.title }}</td>
+                    <td>
+                        <span [class]="'badge ' + getStatusBadge(ticket.status)">
+                            {{ ticket.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <span [class]="'badge ' + getPriorityBadge(ticket.priority)">
+                            {{ ticket.priority }}
+                        </span>
+                    </td>
+                    <td>{{ ticket.createdAt | date: 'short' }}</td>
+                    <td>
+                        <a [routerLink]="['/tickets', ticket.id]" class="btn-link">Ver</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="actions">
+            <a routerLink="/tickets" class="btn btn-primary">Ver Todos los Tickets</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Profile {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  description   String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  users         User[]
+  profileOptions ProfileOption[]
+
+  @@map("profiles")
+}
+
+model Module {
+  id            String   @id @default(cuid())
+  name          String
+  description   String
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  options       Option[]
+
+  @@map("modules")
+}
+
+model Option {
+  id            String   @id @default(cuid())
+  moduleId      String
+  name          String
+  path          String
+  icon          String?
+  createdAt     DateTime @default(now())
+  
+  module        Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  profileOptions ProfileOption[]
+
+  @@map("options")
+}
+
+model ProfileOption {
+  id            String   @id @default(cuid())
+  profileId     String
+  optionId      String
+  createdAt     DateTime @default(now())
+  
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  option        Option   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  
+  @@unique([profileId, optionId])
+  @@map("profile_options")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  profileId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  profile       Profile  @relation(fields: [profileId], references: [id])
+  ticketsCreated Ticket[] @relation("createdBy")
+  ticketsAssigned Ticket[] @relation("assignedTo")
+  comments      Comment[]
+  assignments   Assignment[]
+
+  @@index([profileId])
+  @@index([email])
+  @@map("users")
+}
+
+model Ticket {
+  id            String          @id @default(cuid())
+  title         String
+  description   String
+  status        TicketStatus    @default(OPEN)
+  priority      TicketPriority  @default(MEDIUM)
+  userId        String
+  assignedTo    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  creator       User            @relation("createdBy", fields: [userId], references: [id], onDelete: Cascade)
+  assignee      User?           @relation("assignedTo", fields: [assignedTo], references: [id])
+  comments      Comment[]
+  assignments   Assignment[]
+
+  @@index([userId])
+  @@index([assignedTo])
+  @@index([status])
+  @@map("tickets")
+}
+
+model Comment {
+  id            String   @id @default(cuid())
+  content       String
+  userId        String
+  ticketId      String
+  createdAt     DateTime @default(now())
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([ticketId])
+  @@map("comments")
+}
+
+model Assignment {
+  id            String   @id @default(cuid())
+  userId        String
+  ticketId      String
+  assignedAt    DateTime @default(now())
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, ticketId])
+  @@index([userId])
+  @@index([ticketId])
+  @@map("assignments")
+}

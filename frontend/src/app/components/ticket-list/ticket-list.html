@@ -1,0 +1,42 @@
+<div class="ticket-list">
+    <div *ngIf="loading" class="loading">
+        Cargando tickets...
+    </div>
+
+    <div *ngIf="!loading && tickets.length === 0" class="no-data">
+        No hay tickets para mostrar
+    </div>
+
+    <div *ngIf="!loading && tickets.length > 0" class="list-content">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Creado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let ticket of tickets">
+                    <td>{{ ticket.title }}</td>
+                    <td>
+                        <span [class]="'badge ' + getStatusBadge(ticket.status)">
+                            {{ ticket.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <span [class]="'badge ' + getPriorityBadge(ticket.priority)">
+                            {{ ticket.priority }}
+                        </span>
+                    </td>
+                    <td>{{ ticket.createdAt | date: 'short' }}</td>
+                    <td>
+                        <a [routerLink]="['/tickets', ticket.id]" class="btn-link">Ver</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
